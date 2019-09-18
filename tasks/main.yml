@@ -1,0 +1,31 @@
+---
+- name: Ensure old ssd file is not present
+  file:
+    state: absent
+    path: /etc/sysctl.d/99-ssd.conf
+- name: Check if swappiness value already set
+  set_fact:
+    tune_smart_swap: False
+  when:
+    - tune_vm_swappiness is defined
+- name: Set swappiness to a default value
+  set_fact:
+    tune_vm_swappiness: 60
+  when:
+    - tune_smart_swap
+- name: Set swappiness to a slightly higher value when ssd present
+  set_fact:
+    tune_vm_swappiness: "{{ (tune_vm_swappiness | int) + 10 }}"
+  when:
+    - tune_smart_swap
+- name: Set swappiness to lower value for desktop responsiveness
+  set_fact:
+    tune_vm_swappiness: "{{ (tune_vm_swappiness | int) - 50 }}"
+  when:
+    - tune_smart_swap
+  when:
+    - "inventory_hostname in groups.graphical"
+- name: Configure swappiness
+  copy:
+    content: "vm.swappiness={{ tune_vm_swappiness }}"
+    dest: /etc/sysctl.d/99-swap.conf
