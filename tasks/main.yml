@@ -23,8 +23,6 @@
     tune_vm_swappiness: "{{ (tune_vm_swappiness | int) - 50 }}"
   when:
     - tune_smart_swap
-  when:
-    - "inventory_hostname in groups.graphical"
 - name: Configure swappiness
   copy:
     content: "vm.swappiness={{ tune_vm_swappiness }}"
