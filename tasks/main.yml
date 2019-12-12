@@ -18,11 +18,15 @@
     tune_vm_swappiness: "{{ (tune_vm_swappiness | int) + 10 }}"
   when:
     - tune_smart_swap
+    - ssd_present is defined
+    - ssd_present
 - name: Set swappiness to lower value for desktop responsiveness
   set_fact:
     tune_vm_swappiness: "{{ (tune_vm_swappiness | int) - 50 }}"
   when:
     - tune_smart_swap
+    - graphical_env is defined
+    - graphical_env != "none"
 - name: Configure swappiness
   copy:
     content: "vm.swappiness={{ tune_vm_swappiness }}"
